@@ -66,7 +66,7 @@
   const settings = Object.assign({
     out: '', device: 0, channel: 0, part: 0,
     liveSend: true, autoSend: true, storeToPlg: false,
-    velocity: 100, octave: 0, bank: 'Internal', perfHidden: false, gridExpanded: false,
+    velocity: 100, octave: 0, bank: 'Internal', perfHidden: false, uiScaling: 'fixed', gridExpanded: false,
   }, store.get('settings', {}));
   const saveSettings = () => store.set('settings', settings);
   if (settings.bank === OLD_POWER_USER) settings.bank = POWER_USER;
@@ -1733,6 +1733,11 @@
       refreshPorts();
     });
     $('midiConnect').addEventListener('click', enableMidi);
+    const applyUiScaling = () => document.body.classList.toggle('ui-auto', settings.uiScaling === 'auto');
+    if (settings.uiScaling !== 'auto') settings.uiScaling = 'fixed';   // unknown or missing value
+    $('uiScaling').value = settings.uiScaling;
+    applyUiScaling();
+    $('uiScaling').addEventListener('change', e => { settings.uiScaling = e.target.value; saveSettings(); applyUiScaling(); });
 
     const bindCheck = (id, key) => {
       $(id).checked = settings[key];

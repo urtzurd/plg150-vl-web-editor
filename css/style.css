@@ -21,6 +21,7 @@
   --key-white: #f2f3ee;
   --key-black: #141819;
   --key-active: #2ec4b1;
+  --u: 1px;                   /* panel scale unit: 1px, or growing with the page width at UI Scaling "Auto" */
   font-size: 14px;
 }
 
@@ -56,6 +57,7 @@ button, select, input { font: inherit; color: inherit; }
 .setup-fields { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
 .setup-fields label { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
 .setup-fields select { max-width: 220px; }
+.setup-right { margin-left: auto; }
 .status { font-size: 12px; padding: 3px 8px; border-radius: 10px; background: #1d3438; color: var(--muted); }
 .status.ok { background: #1f4130; color: #9fe0b0; }
 .status.err { background: #4a2020; color: #ffb0a8; }
@@ -106,6 +108,7 @@ body.dragging, body.dragging * { cursor: ns-resize !important; user-select: none
 .check { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); white-space: nowrap; }
 
 main { padding: 12px 16px; max-width: 1512px; margin: 0 auto; }
+body.ui-auto main { max-width: 1840px; }   /* UI Scaling "Auto": room for the scaled panel */
 
 .panel {
   background: var(--panel);
@@ -235,7 +238,12 @@ main { padding: 12px 16px; max-width: 1512px; margin: 0 auto; }
 /* One grid of 20 equal columns for the whole panel. Blocks, their rows and
    sub-sections are subgrids, so every control lines up with the controls above,
    below and beside it. Each cell has the same vertical layout: a 40px control
-   area (knob, button, drop-down), a 13px value line, then the label. */
+   area (knob, button, drop-down), a 13px value line, then the label.
+   Every size is in --u, a "panel pixel": 1px at UI Scaling "Fixed". With UI
+   Scaling "Auto" (body.ui-auto) it grows with the width of the Voice page (1px for
+   a ~55px cell, up to 1.5px), so wider windows get bigger controls. */
+#tab-voice { container-type: inline-size; }
+body.ui-auto .synth { --u: clamp(1px, (100cqi - 330px) / 1100, 1.5px); }
 .synth {
   --cell-gap: 8px;
   display: grid; column-gap: var(--cell-gap); row-gap: 8px;
@@ -252,7 +260,7 @@ main { padding: 12px 16px; max-width: 1512px; margin: 0 auto; }
   background: linear-gradient(160deg, var(--silver-1), var(--silver-2));
   color: var(--silver-text);
   border-radius: 6px 6px 3px 3px;
-  padding: 5px 0 6px;            /* no side padding: it would shift the edge cells off the grid */
+  padding: calc(5 * var(--u)) 0 calc(6 * var(--u));            /* no side padding: it would shift the edge cells off the grid */
   min-width: 0;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 1px 3px rgba(0,0,0,.5);
 }
@@ -260,21 +268,21 @@ main { padding: 12px 16px; max-width: 1512px; margin: 0 auto; }
 .blk.hot { box-shadow: inset 0 3px 0 var(--accent), inset 0 1px 0 rgba(255,255,255,.6), 0 1px 3px rgba(0,0,0,.5); }
 .blk.off .blk-head h3 { color: #5f7479; }
 .blk > *, .subblk > * { grid-column: 1 / -1; }
-.blk-head { display: flex; align-items: center; gap: 8px; height: 18px; margin-bottom: 2px; padding: 0 10px; min-width: 0; }
+.blk-head { display: flex; align-items: center; gap: 8px; height: calc(18 * var(--u)); margin-bottom: calc(2 * var(--u)); padding: 0 calc(10 * var(--u)); min-width: 0; }
 .blk-head h3 {
-  margin: 0; font-size: 13px; font-weight: 900; font-style: italic; letter-spacing: 1.5px;
+  margin: 0; font-size: calc(13 * var(--u)); font-weight: 900; font-style: italic; letter-spacing: 1.5px;
   color: #134a52; text-shadow: 0 1px 0 rgba(255,255,255,.6); white-space: nowrap;
 }
-.blk-head .blk-sub { font-size: 9px; font-weight: 800; letter-spacing: .5px; color: var(--silver-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.blk-head .blk-sub { font-size: calc(9 * var(--u)); font-weight: 800; letter-spacing: .5px; color: var(--silver-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .detail-btn {
-  font-size: 9px; font-weight: 700; letter-spacing: .5px; padding: 1px 5px; cursor: pointer;
+  font-size: calc(9 * var(--u)); font-weight: 700; letter-spacing: .5px; padding: calc(1 * var(--u)) calc(5 * var(--u)); cursor: pointer;
   background: #1d5560; color: #dff6f3; border: 1px solid #0a2a30; border-radius: 2px; margin-left: auto;
 }
 .detail-btn:hover { background: #26707e; }
 /* rows: same height everywhere, so rows line up across blocks */
 .krow {
   display: grid; grid-template-columns: subgrid; align-items: start;
-  min-height: 66px;
+  min-height: calc(66 * var(--u));
 }
 .blk > .krow > *, .subblk > .krow > * { grid-column: auto; }
 .slot { min-width: 0; }
@@ -287,27 +295,27 @@ main { padding: 12px 16px; max-width: 1512px; margin: 0 auto; }
 }
 /* inset, so the ring stays inside the cell (edge cells touch the block edge) */
 .knob:focus-visible { box-shadow: inset 0 0 0 2px var(--accent-2); }
-.knob-svg { width: 40px; height: 40px; display: block; flex: none; }
+.knob-svg { width: calc(40 * var(--u)); height: calc(40 * var(--u)); display: block; flex: none; }
 .k-track { fill: none; stroke: rgba(13, 34, 38, .3); stroke-width: 3; stroke-linecap: round; }
 .k-value { fill: none; stroke: #0b8f80; stroke-width: 3; stroke-linecap: round; }
 .k-cap { fill: var(--knob); stroke: #000; stroke-width: 1; filter: drop-shadow(0 1px 1px rgba(0,0,0,.5)); }
 .k-ptr { stroke: #f4f4f4; stroke-width: 2.4; stroke-linecap: round; }
 .knob-val {
-  font-family: "Courier New", monospace; font-weight: 700; font-size: 11px; line-height: 13px; height: 13px;
+  font-family: "Courier New", monospace; font-weight: 700; font-size: calc(11 * var(--u)); line-height: calc(13 * var(--u)); height: calc(13 * var(--u));
   white-space: nowrap; color: #0a2f35; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
   cursor: text;
 }
 .knob-val:hover { text-decoration: underline dotted; }
 .knob-edit {
-  width: calc(100% - 6px); max-width: 64px; height: 15px; margin: -1px 0; padding: 0 2px; text-align: center;
-  font-family: "Courier New", monospace; font-weight: 700; font-size: 11px;
+  width: calc(100% - 6px); max-width: calc(64 * var(--u)); height: calc(15 * var(--u)); margin: calc(-1 * var(--u)) 0; padding: 0 2px; text-align: center;
+  font-family: "Courier New", monospace; font-weight: 700; font-size: calc(11 * var(--u));
   background: var(--lcd-bg); color: var(--lcd-text); border: 1px solid var(--accent-2); border-radius: 2px;
 }
 /* no outline (it is drawn outside the box); a brighter border shows focus instead */
 .knob-edit:focus { outline: none; border-color: #9fd2ff; box-shadow: inset 0 0 0 1px #9fd2ff; }
 .knob-lbl, .lamps-lbl, .toggle-lbl, .lcdsel-lbl {
-  font-size: 9px; font-weight: 800; letter-spacing: .4px; color: var(--silver-muted);
-  text-transform: uppercase; line-height: 11px; text-align: center; max-width: 100%;
+  font-size: calc(9 * var(--u)); font-weight: 800; letter-spacing: .4px; color: var(--silver-muted);
+  text-transform: uppercase; line-height: calc(11 * var(--u)); text-align: center; max-width: 100%;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .knob.inactive, .lamps.inactive, .lcdsel.inactive, .toggle.inactive { opacity: .35; }
@@ -315,29 +323,29 @@ main { padding: 12px 16px; max-width: 1512px; margin: 0 auto; }
 /* panel push buttons, lamps, toggles: the button sits in the 40px control
    area, the label on the knob-label line (40 + 13 px down) */
 .pbtn {
-  width: 34px; height: 20px; padding: 0; cursor: pointer; position: relative; flex: none;
+  width: calc(34 * var(--u)); height: calc(20 * var(--u)); padding: 0; cursor: pointer; position: relative; flex: none;
   background: linear-gradient(#56676c, #283338); border: 1px solid #0a1214; border-radius: 3px;
   box-shadow: 0 2px 0 #0a1214, inset 0 1px 0 rgba(255,255,255,.25);
 }
 .pbtn:active { transform: translateY(1px); box-shadow: 0 1px 0 #0a1214; }
 .pbtn:disabled { cursor: default; opacity: .6; }
 .pbtn .led-dot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-.led-dot { display: inline-block; width: 14px; height: 5px; border-radius: 1px; background: #1d3a12; box-shadow: inset 0 0 2px #000; }
+.led-dot { display: inline-block; width: calc(14 * var(--u)); height: calc(5 * var(--u)); border-radius: 1px; background: #1d3a12; box-shadow: inset 0 0 2px #000; }
 .pbtn.lit .led-dot, .led-dot.lit { background: var(--lamp-on); box-shadow: 0 0 5px var(--lamp-on); }
 .toggle { display: flex; flex-direction: column; align-items: center; min-width: 0; }
-.toggle .pbtn { margin: 10px 0; }
-.toggle-lbl { margin-top: 13px; }
-.lamps { display: flex; gap: 4px; align-items: flex-start; justify-content: center; min-width: 0; }
+.toggle .pbtn { margin: calc(10 * var(--u)) 0; }
+.toggle-lbl { margin-top: calc(13 * var(--u)); }
+.lamps { display: flex; gap: calc(4 * var(--u)); align-items: flex-start; justify-content: center; min-width: 0; }
 .lamps-btncol { display: flex; flex-direction: column; align-items: center; }
-.lamps-btncol .pbtn { margin: 10px 0; }
-.lamps-lbl { margin-top: 13px; }
+.lamps-btncol .pbtn { margin: calc(10 * var(--u)) 0; }
+.lamps-lbl { margin-top: calc(13 * var(--u)); }
 .lamp-list { list-style: none; margin: 0; padding: 1px 0 0; display: flex; flex-direction: column; }
 .lamp {
-  font-size: 9px; font-weight: 800; letter-spacing: .2px; line-height: 10.5px; cursor: pointer;
-  white-space: nowrap; color: var(--silver-text); padding-left: 10px; position: relative;
+  font-size: calc(9 * var(--u)); font-weight: 800; letter-spacing: .2px; line-height: calc(10.5 * var(--u)); cursor: pointer;
+  white-space: nowrap; color: var(--silver-text); padding-left: calc(10 * var(--u)); position: relative;
 }
 .lamp::before {
-  content: ""; position: absolute; left: 0; top: 50%; width: 6px; height: 6px; margin-top: -3px;
+  content: ""; position: absolute; left: 0; top: 50%; width: calc(6 * var(--u)); height: calc(6 * var(--u)); margin-top: calc(-3 * var(--u));
   border-radius: 50%; background: #34421f; box-shadow: inset 0 0 1px #000;
 }
 .lamp.on::before { background: var(--lamp-on); box-shadow: 0 0 4px var(--lamp-on); }
@@ -355,33 +363,33 @@ main { padding: 12px 16px; max-width: 1512px; margin: 0 auto; }
 .lcdsel { display: flex; flex-direction: column; align-items: center; min-width: 0; padding: 0 2px; }
 .lcdsel select {
   background: var(--lcd-bg); color: var(--lcd-text); border: 1px solid #000; border-radius: 2px;
-  font-family: "Courier New", monospace; font-weight: 700; font-size: 11px; padding: 0 3px; height: 20px;
-  max-width: 100%; margin: 10px 0; cursor: pointer;
+  font-family: "Courier New", monospace; font-weight: 700; font-size: calc(11 * var(--u)); padding: 0 3px; height: calc(20 * var(--u));
+  max-width: 100%; margin: calc(10 * var(--u)) 0; cursor: pointer;
 }
-.lcdsel-lbl { margin-top: 13px; }
+.lcdsel-lbl { margin-top: calc(13 * var(--u)); }
 .lcdsel.wide { align-items: stretch; }
 .lcdsel.wide select { width: 100%; }
 /* name boxes: same look as the LCD drop-downs */
 .name-cell .voice-name, .name-cell .elem-name {
   background: var(--lcd-bg); color: var(--lcd-text); border: 1px solid #000; border-radius: 2px;
-  font-family: "Courier New", monospace; font-weight: 700; font-size: 11px; height: 20px; padding: 0 3px;
-  margin: 10px 0; width: 100%; letter-spacing: .4px;
+  font-family: "Courier New", monospace; font-weight: 700; font-size: calc(11 * var(--u)); height: calc(20 * var(--u)); padding: 0 3px;
+  margin: calc(10 * var(--u)) 0; width: 100%; letter-spacing: .4px;
 }
 .name-cell .voice-name:focus, .name-cell .elem-name:focus { outline: none; border-color: #9fd2ff; box-shadow: inset 0 0 0 1px #9fd2ff; }
 .name-cell input:disabled { opacity: .7; }
 /* model information (custom voices): an LCD box in the control area */
 .model-info {
-  margin: 3px 6px 0; background: var(--lcd-bg); color: var(--lcd-text); border-radius: 2px; padding: 2px 6px;
-  font-family: "Courier New", monospace; font-size: 10px; font-weight: 700; line-height: 13px; height: 47px; overflow: hidden;
+  margin: calc(3 * var(--u)) calc(6 * var(--u)) 0; background: var(--lcd-bg); color: var(--lcd-text); border-radius: 2px; padding: calc(2 * var(--u)) calc(6 * var(--u));
+  font-family: "Courier New", monospace; font-size: calc(10 * var(--u)); font-weight: 700; line-height: calc(13 * var(--u)); height: calc(47 * var(--u)); overflow: hidden;
 }
 .model-info .dim { opacity: .6; }
 
 /* controller response graph (under each VL control's knobs) */
-.eg-box { margin: 1px 8px 3px; background: #071b1f; border: 1px solid #000; border-radius: 2px; min-width: 0; }
-.resp { width: 100%; height: 40px; display: block; }
+.eg-box { margin: calc(1 * var(--u)) calc(8 * var(--u)) calc(3 * var(--u)); background: #071b1f; border: 1px solid #000; border-radius: 2px; min-width: 0; }
+.resp { width: 100%; height: calc(40 * var(--u)); display: block; }
 .eg-times {
-  display: flex; justify-content: space-between; gap: 6px; padding: 1px 5px 2px;
-  font-family: "Courier New", monospace; font-weight: 700; font-size: 10px; line-height: 12px;
+  display: flex; justify-content: space-between; gap: 6px; padding: calc(1 * var(--u)) calc(5 * var(--u)) calc(2 * var(--u));
+  font-family: "Courier New", monospace; font-weight: 700; font-size: calc(10 * var(--u)); line-height: calc(12 * var(--u));
   color: #9ff7e2; white-space: nowrap; overflow: hidden; border-top: 1px solid #12363c;
 }
 .eg-div { stroke: #2d5a61; stroke-width: 1; stroke-dasharray: 2 2; vector-effect: non-scaling-stroke; }

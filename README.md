@@ -201,3 +201,4 @@ Res. Freq. is on (as in SuprJazz).
 ## Changelog
 
 - 2/Nov/2026: First version of the editor.
+- 3/Nov/2026: New UI Scaling option in the top bar. Fixed keeps the usual sizes; Auto makes the Voice page controls grow with the window width (on windows wider than about 1450px).
